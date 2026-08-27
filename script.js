@@ -1,4 +1,29 @@
 // ============ NIGHTLINE - ПОЛНЫЙ SCRIPT.JS ============
+// ============ FIREBASE REALTIME DATABASE ============
+
+// Firebase конфигурация
+const firebaseConfig = {
+  apiKey: "AIzaSyDsmOYDN6Fk0P0Cc9KLjliTAQ7__isn7Nk",
+  authDomain: "nightline-morse.firebaseapp.com",
+  databaseURL: "https://nightline-morse-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "nightline-morse",
+  storageBucket: "nightline-morse.firebasestorage.app",
+  messagingSenderId: "433746041459",
+  appId: "1:433746041459:web:f09167933f6c01367ee806",
+  measurementId: "G-2HF077PN2P"
+};
+
+// Инициализация Firebase
+let firebaseApp, database;
+try {
+  firebaseApp = firebase.initializeApp(firebaseConfig);
+  database = firebase.database();
+  console.log("🔥 Firebase подключен!");
+} catch(e) {
+  console.error("❌ Ошибка Firebase:", e);
+}
+
+// ============ КОНСТАНТЫ ============
 const MORSE_CODE={А:'.-',Б:'-...',В:'.--',Г:'--.',Д:'-..',Е:'.',Ж:'...-',З:'--..',И:'..',Й:'.---',К:'-.-',Л:'.-..',М:'--',Н:'-.',О:'---',П:'.--.',Р:'.-.',С:'...',Т:'-',У:'..-',Ф:'..-.',Х:'....',Ц:'-.-.',Ч:'---.',Ш:'----',Щ:'--.-',Ъ:'--.--',Ы:'-.--',Ь:'-..-',Э:'..-..',Ю:'..--',Я:'.-.-',A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',',':'--..--','.':'.-.-.-','?':'..--..','!':'-.-.--',':':'---...',';':'-.-.-.','-':'-....-','/':'-..-.','@':'.--.-.','(':'-.--.',')':'-.--.-',' ':' '};
 const TITLES=[{level:5,name:'НАЧИНАЮЩИЙ',nameEn:'BEGINNER',color:'#58a6ff',desc:'За достижение 5 уровня',descEn:'For reaching level 5'},{level:10,name:'УЧЕНИК',nameEn:'STUDENT',color:'#3fb950',desc:'За достижение 10 уровня',descEn:'For reaching level 10'},{level:20,name:'ЗНАТОК',nameEn:'EXPERT',color:'#d29922',desc:'За достижение 20 уровня',descEn:'For reaching level 20'},{level:35,name:'ОПЫТНЫЙ',nameEn:'EXPERIENCED',color:'#bc8cff',desc:'За достижение 35 уровня',descEn:'For reaching level 35'},{level:50,name:'МАСТЕР',nameEn:'MASTER',color:'#f85149',desc:'За достижение 50 уровня',descEn:'For reaching level 50'},{level:67,name:'ЭКСПЕРТ',nameEn:'SPECIALIST',color:'#ff7b72',desc:'За достижение 67 уровня',descEn:'For reaching level 67'},{level:100,name:'ВИРТУОЗ',nameEn:'VIRTUOSO',color:'#a5d6ff',desc:'За достижение 100 уровня',descEn:'For reaching level 100'},{level:333,name:'ЛЕГЕНДА',nameEn:'LEGEND',color:'#ffd700',desc:'За достижение 333 уровня',descEn:'For reaching level 333'},{level:500,name:'МИФ',nameEn:'MYTH',color:'#ff69b4',desc:'За достижение 500 уровня',descEn:'For reaching level 500'},{level:1000,name:'БОГ МОРЗЕ',nameEn:'MORSE GOD',color:'#00ffff',desc:'За достижение 1000 уровня',descEn:'For reaching level 1000'},{level:2000,name:'ТИТАН',nameEn:'TITAN',color:'#ff4500',desc:'За достижение 2000 уровня',descEn:'For reaching level 2000'},{level:3000,name:'ВЛАСТЕЛИН',nameEn:'OVERLORD',color:'#9400d3',desc:'За достижение 3000 уровня',descEn:'For reaching level 3000'},{level:4000,name:'ПОВЕЛИТЕЛЬ',nameEn:'RULER',color:'#ff1493',desc:'За достижение 4000 уровня',descEn:'For reaching level 4000'},{level:5000,name:'ИМПЕРАТОР',nameEn:'EMPEROR',color:'#ffd700',desc:'За достижение 5000 уровня',descEn:'For reaching level 5000'},{level:6000,name:'ФЕНИКС',nameEn:'PHOENIX',color:'#ff6347',desc:'За достижение 6000 уровня',descEn:'For reaching level 6000'},{level:7000,name:'ДРАКОН',nameEn:'DRAGON',color:'#00ff7f',desc:'За достижение 7000 уровня',descEn:'For reaching level 7000'},{level:8000,name:'ТВОРЕЦ',nameEn:'CREATOR',color:'#7fffd4',desc:'За достижение 8000 уровня',descEn:'For reaching level 8000'},{level:9000,name:'ХРАНИТЕЛЬ',nameEn:'KEEPER',color:'#ff8c00',desc:'За достижение 9000 уровня',descEn:'For reaching level 9000'},{level:10000,name:'НОЧНОЙ ГОЛОС',nameEn:'NIGHT VOICE',color:'#fff',desc:'За достижение 10000 уровня',descEn:'For reaching level 10000'}];
 const CATCHER_TITLES=[{count:1,name:'ЛОВЕЦ ЧАСТИЦ I',nameEn:'PARTICLE CATCHER I',color:'#ffd700',desc:'За 1 пойманную частицу',descEn:'For catching 1 particle'},{count:10,name:'ЛОВЕЦ ЧАСТИЦ II',nameEn:'PARTICLE CATCHER II',color:'#ff9f43',desc:'За 10 пойманных частиц',descEn:'For catching 10 particles'},{count:50,name:'ЛОВЕЦ ЧАСТИЦ III',nameEn:'PARTICLE CATCHER III',color:'#ff6b6b',desc:'За 50 пойманных частиц',descEn:'For catching 50 particles'},{count:100,name:'ЛОВЕЦ ЧАСТИЦ IV',nameEn:'PARTICLE CATCHER IV',color:'#a29bfe',desc:'За 100 пойманных частиц',descEn:'For catching 100 particles'},{count:1000,name:'ЛОВЕЦ ЧАСТИЦ V',nameEn:'PARTICLE CATCHER V',color:'#00ffff',desc:'За 1000 пойманных частиц',descEn:'For catching 1000 particles'}];
@@ -8,17 +33,83 @@ const I18N={ru:{home:'Главная',learn:'Обучение',practice:'Пра�
 const WORDS={ru:{easy:['КОД','РАК','ДОМ','СОН','МИР','ЛУК','МЕЛ','ШАР','ЖУК','ЛЕС'],normal:['РАДИО','НОЧЬ','ВОЛНА','ЭФИР','МОРЗЕ','СВЯЗЬ','СИГНАЛ','ПОЧТА','КОМПАС','КАРТА'],hard:['ПРИВЕТ','СПАСИБО','АНТЕННА','ЧАСТОТА','ПЕРЕДАЧА','ПРИЁМНИК','СООБЩЕНИЕ','ТЕЛЕГРАФ','СПУТНИК','РАКЕТА'],extreme:['РАДИОСТАНЦИЯ','ПЕРЕДАТЧИК','ТЕЛЕГРАФИЯ','КОММУНИКАЦИЯ','ИНФОРМАЦИЯ'],impossible:['РАДИОПЕРЕХВАТ','КРИПТОГРАФИЯ','ДЕШИФРОВАНИЕ','ШИФРОВАНИЕ']},en:{easy:['CAT','DOG','SUN','SKY','RUN','FLY','MAP','KEY','BOX','TOP'],normal:['HELLO','WORLD','RADIO','NIGHT','WAVE','SIGNAL','MORSE','CLOUD','STORM','OCEAN'],hard:['TRANSMIT','RECEIVER','ANTENNA','FREQUENCY','MESSAGE','SATELLITE','ROCKET','PLANET','GALAXY','HORIZON'],extreme:['COMMUNICATION','TRANSMISSION','MODULATION','FREQUENCY','AMPLITUDE'],impossible:['CRYPTOGRAPHY','RADIOINTERCEPT','DECRYPTION','ENCRYPTION']}};
 const RU='АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split(''),EN='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),NUM='0123456789'.split(''),PUNCT=[',','.','?','!',':',';','-','/','@','(',')'];
 const SECRET_KEY='NightlineSecretKey2024';
-const JSONBIN_API_KEY='$2a$10$DHfCr0L26PY.Xn4H75193OIT8XK8MxSCY6Ezv7ECdITONFHo4vKvO';
-const JSONBIN_BIN_ID='6a872ae9f5f4af5e292da60d';
-const JSONBIN_URL=`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-const DEFAULT_SOUND={morseFreq:700,morseVol:500,clickVol:400,clickFreq:900,clickDur:70,musicVol:300};
-let audioCtx=null,curAlpha='ru',curLesson=0,exp=0,attempts=0,correct=0,pressed=false,pressT=0,morseIn='',targetWord='',txIdx=0,diff='easy',user=null,title=null,viewing=null,sessStart=Date.now(),autoTitle=false,lbTab='level',cache=null,oscs=[],shuffle=false,lang=localStorage.getItem('morse-lang')||'ru',sessInt=null,saveT=null,musicEl=null,particlesCaught=0,particleTimeout=null,particleEl=null,titleAnimTimeout=null,expAnimTimeout=null,clickVol=parseInt(localStorage.getItem('click-vol')||DEFAULT_SOUND.clickVol),clickFreq=parseInt(localStorage.getItem('click-freq')||DEFAULT_SOUND.clickFreq),clickDur=parseInt(localStorage.getItem('click-dur')||DEFAULT_SOUND.clickDur),morseVol=parseInt(localStorage.getItem('morse-vol')||DEFAULT_SOUND.morseVol),morseFreq=parseInt(localStorage.getItem('morse-freq')||DEFAULT_SOUND.morseFreq),musicVol=parseInt(localStorage.getItem('music-vol')||DEFAULT_SOUND.musicVol),lastXpMinute=0;
-const MAXL=10000,$=id=>document.getElementById(id),t=k=>I18N[lang]?.[k]||k,lvlFromExp=e=>e<=0?1:Math.min(Math.floor(Math.sqrt(e/1.25))+1,MAXL),expForLvl=l=>l<=1?0:Math.pow(Math.min(l,MAXL)-1,2)*1.25,lvlColor=l=>`hsl(${(l-1)%360},${70+(l%30)}%,${55+(l%20)}%)`,fmtTime=ms=>{const m=Math.floor(ms/6e4);return m<60?`${m}м`:`${Math.floor(m/60)}ч`},fmtDate=iso=>{const d=new Date(iso);return`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`};
+const MAXL=10000;
+
+// ============ ПЕРЕМЕННЫЕ ============
+let audioCtx=null,curAlpha='ru',curLesson=0,exp=0,attempts=0,correct=0,pressed=false,pressT=0,morseIn='',targetWord='',txIdx=0,diff='easy',user=null,title=null,viewing=null,sessStart=Date.now(),autoTitle=false,lbTab='level',cache=null,oscs=[],shuffle=false,lang=localStorage.getItem('morse-lang')||'ru',sessInt=null,saveT=null,musicEl=null,particlesCaught=0,particleTimeout=null,particleEl=null,titleAnimTimeout=null,expAnimTimeout=null,clickVol=parseInt(localStorage.getItem('click-vol')||400),clickFreq=parseInt(localStorage.getItem('click-freq')||900),clickDur=parseInt(localStorage.getItem('click-dur')||70),morseVol=parseInt(localStorage.getItem('morse-vol')||500),morseFreq=parseInt(localStorage.getItem('morse-freq')||700),musicVol=parseInt(localStorage.getItem('music-vol')||300),lastXpMinute=0;
+
+// ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+const $=id=>document.getElementById(id);
+const t=k=>I18N[lang]?.[k]||k;
+const lvlFromExp=e=>e<=0?1:Math.min(Math.floor(Math.sqrt(e/1.25))+1,MAXL);
+const expForLvl=l=>l<=1?0:Math.pow(Math.min(l,MAXL)-1,2)*1.25;
+const lvlColor=l=>`hsl(${(l-1)%360},${70+(l%30)}%,${55+(l%20)}%)`;
+const fmtTime=ms=>{const m=Math.floor(ms/6e4);return m<60?`${m}м`:`${Math.floor(m/60)}ч`;};
+const fmtDate=iso=>{const d=new Date(iso);return`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;};
+
+// ============ ШИФРОВАНИЕ ============
 function encryptPassword(password){let encrypted='';for(let i=0;i<password.length;i++){const charCode=password.charCodeAt(i)^SECRET_KEY.charCodeAt(i%SECRET_KEY.length);encrypted+=String.fromCharCode(charCode)}return btoa(encrypted)}
 function decryptPassword(encrypted){try{const decoded=atob(encrypted);let decrypted='';for(let i=0;i<decoded.length;i++){const charCode=decoded.charCodeAt(i)^SECRET_KEY.charCodeAt(i%SECRET_KEY.length);decrypted+=String.fromCharCode(charCode)}return decrypted}catch(e){return''}}
-async function savePlayerToCloud(username,data){try{const response=await fetch(JSONBIN_URL,{headers:{'X-Master-Key':JSONBIN_API_KEY}});const json=await response.json();const players=json.record.players||[];const index=players.findIndex(p=>p.username===username);const playerData={username:username,exp:data.exp||0,title:data.title||null,sessionTime:data.sessionTime||0,particlesCaught:data.particlesCaught||0,updatedAt:Date.now()};if(index>=0){players[index]=playerData}else{players.push(playerData)}await fetch(JSONBIN_URL,{method:'PUT',headers:{'X-Master-Key':JSONBIN_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({players:players})})}catch(e){console.error('Ошибка сохранения:',e)}}
-async function removePlayerFromCloud(username){try{const response=await fetch(JSONBIN_URL,{headers:{'X-Master-Key':JSONBIN_API_KEY}});const json=await response.json();const players=json.record.players||[];const filtered=players.filter(p=>p.username!==username);await fetch(JSONBIN_URL,{method:'PUT',headers:{'X-Master-Key':JSONBIN_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({players:filtered})})}catch(e){console.error('Ошибка удаления:',e)}}
-async function loadAllPlayers(){try{const response=await fetch(JSONBIN_URL,{headers:{'X-Master-Key':JSONBIN_API_KEY}});const json=await response.json();return json.record.players||[]}catch(e){console.error('Ошибка загрузки:',e);return[]}}
+
+// ============ FIREBASE ФУНКЦИИ (ЗАМЕНА JSONBIN) ============
+async function savePlayerToCloud(username, data) {
+    if(!database) { console.warn("⚠️ Firebase не подключен"); return; }
+    try {
+        await database.ref('players/' + username).update({
+            username: username,
+            exp: data.exp || 0,
+            title: data.title || null,
+            sessionTime: data.sessionTime || 0,
+            particlesCaught: data.particlesCaught || 0,
+            updatedAt: Date.now()
+        });
+    } catch(e) { console.error("❌ Ошибка сохранения:", e); }
+}
+
+async function removePlayerFromCloud(username) {
+    if(!database) return;
+    try { await database.ref('players/' + username).remove(); }
+    catch(e) { console.error("❌ Ошибка удаления:", e); }
+}
+
+async function loadAllPlayers() {
+    if(!database) {
+        console.warn("⚠️ Firebase не подключен, загрузка из localStorage");
+        return loadFromLocalStorage();
+    }
+    try {
+        const snapshot = await database.ref('players').once('value');
+        const data = snapshot.val();
+        if(!data) return [];
+        return Object.values(data);
+    } catch(e) {
+        console.error("❌ Ошибка загрузки:", e);
+        return loadFromLocalStorage();
+    }
+}
+
+function loadFromLocalStorage() {
+    const players = [];
+    for(let i=0;i<localStorage.length;i++) {
+        const key = localStorage.key(i);
+        if(key && key.startsWith('user-')) {
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                players.push({
+                    username: data.username,
+                    exp: data.exp || 0,
+                    title: data.title || null,
+                    sessionTime: data.sessionTime || 0,
+                    particlesCaught: data.particlesCaught || 0,
+                    updatedAt: Date.now()
+                });
+            } catch(e) {}
+        }
+    }
+    return players;
+}
+
+// ============ ВСЕ ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ============
 window.showPage=function(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const tg=$(`page-${p}`);if(tg)tg.classList.add('active');window.scrollTo(0,0);if(p==='profile'){ownProf()}if(p==='leaderboard'){if(lvlFromExp(exp)<50){$('leaderboard-locked').style.display='block';$('leaderboard-content').style.display='none';}else{$('leaderboard-locked').style.display='none';$('leaderboard-content').style.display='block';lbTab='level';document.querySelectorAll('.leaderboard-tab').forEach(b=>b.classList.remove('active'));const f=document.querySelector('.leaderboard-tab');if(f)f.classList.add('active');updLB()}}updBottomNav(p);if(p==='home')startParticleGame();else stopParticleGame()};
 window.switchAuthTab=function(tb,btn){document.querySelectorAll('.auth-tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$('login-form').style.display=tb==='login'?'block':'none';$('register-form').style.display=tb==='register'?'block':'none';$('auth-error').textContent=''};
 window.toggleLanguage=function(){lang=lang==='ru'?'en':'ru';localStorage.setItem('morse-lang',lang);applyLang();updProfile();updUI();if($('page-practice').classList.contains('active'))resetTx()};
@@ -35,7 +126,7 @@ window.openShowPasswordModal=function(){$('password-options-modal').style.displa
 window.closeConfirmModal=function(id){$(id).style.display='none'};
 window.closeSettingsModal=function(){$('settings-modal').style.display='none'};
 window.closeSoundModal=function(){$('sound-modal').style.display='none'};
-window.confirmLogout=function(){if(user){user.sessionTime=Date.now()-sessStart;localStorage.setItem(`user-${user.username}`,JSON.stringify(user));savePlayerToCloud(user.username,user)}clearInterval(sessInt);localStorage.removeItem('morse-user');user=null;viewing=null;exp=0;closeConfirmModal('logout-modal');$('auth-modal').style.display='flex';showPage('home')};
+window.confirmLogout=function(){if(user){user.sessionTime=Date.now()-sessStart;localStorage.setItem(`user-${user.username}`,JSON.stringify(user));localStorage.setItem('morse-user',JSON.stringify(user));savePlayerToCloud(user.username,user)}clearInterval(sessInt);localStorage.removeItem('morse-user');user=null;viewing=null;exp=0;closeConfirmModal('logout-modal');$('auth-modal').style.display='flex';showPage('home')};
 window.confirmChangePassword=function(){const p=$('new-password-input').value;if(!p||p.length<4){alert('Минимум 4 символа!');return}if(!user||viewing)return;user.password=encryptPassword(p);localStorage.setItem(`user-${user.username}`,JSON.stringify(user));localStorage.setItem('morse-user',JSON.stringify(user));closeConfirmModal('password-modal');updProfile()};
 window.openTitlesModal=function(){if(viewing)return;closeModal('cosmetics-modal');const m=$('titles-modal'),l=$('titles-list'),n=$('next-title');m.style.display='flex';l.innerHTML='';ALL_TITLES.filter(x=>{if(x.count!==undefined)return particlesCaught>=x.count;return lvlFromExp(exp)>=x.level}).forEach(tt=>{const d=document.createElement('div');d.className='title-item';d.style.color=tt.color;d.style.borderColor=tt.color;d.innerHTML=`<div style="font-weight:700">${lang==='ru'?tt.name:tt.nameEn}</div><div style="font-size:.35rem;color:var(--dim);margin-top:.3rem">${lang==='ru'?tt.desc:tt.descEn}</div>`;d.onclick=()=>selTitle(tt.name);if(title===tt.name||title===tt.nameEn){d.style.background=tt.color+'20';d.style.boxShadow=`0 0 15px ${tt.color}4D`}l.appendChild(d)});const nt=ALL_TITLES.find(x=>{if(x.count!==undefined)return particlesCaught<x.count;return lvlFromExp(exp)<x.level});if(n){if(nt){n.innerHTML=`<div style="border:1px solid ${nt.color};border-radius:8px;padding:.8rem;box-shadow:0 0 15px ${nt.color}4D"><div style="font-weight:700;color:${nt.color}">${t('nextTitle')}: ${lang==='ru'?nt.name:nt.nameEn}</div><div style="font-size:.35rem;color:var(--dim);margin-top:.3rem">${lang==='ru'?nt.desc:nt.descEn}</div></div>`}else{n.textContent=t('allTitles');n.style.color='#fff'}}};
 window.openCosmeticsModal=function(){if(viewing)return;$('cosmetics-modal').style.display='flex'};
@@ -57,8 +148,10 @@ window.changeClickVol=function(v){clickVol=parseInt(v);localStorage.setItem('cli
 window.changeClickFreq=function(v){clickFreq=parseInt(v);localStorage.setItem('click-freq',clickFreq);$('click-freq-val').textContent=clickFreq+'гц'};
 window.changeClickDur=function(v){clickDur=parseInt(v);localStorage.setItem('click-dur',clickDur);$('click-dur-val').textContent=clickDur+'мс'};
 window.changeMusicVol=function(v){musicVol=parseInt(v);localStorage.setItem('music-vol',musicVol);$('music-vol-val').textContent=musicVol;if(musicEl)musicEl.volume=musicVol/1200;if(musicVol===0)stopMusic();else if(musicEl&&musicEl.paused)startMusic()};
-window.resetSoundSettings=function(){morseFreq=DEFAULT_SOUND.morseFreq;morseVol=DEFAULT_SOUND.morseVol;clickVol=DEFAULT_SOUND.clickVol;clickFreq=DEFAULT_SOUND.clickFreq;clickDur=DEFAULT_SOUND.clickDur;musicVol=DEFAULT_SOUND.musicVol;localStorage.setItem('morse-freq',morseFreq);localStorage.setItem('morse-vol',morseVol);localStorage.setItem('click-vol',clickVol);localStorage.setItem('click-freq',clickFreq);localStorage.setItem('click-dur',clickDur);localStorage.setItem('music-vol',musicVol);updSoundSliders()};
+window.resetSoundSettings=function(){morseFreq=700;morseVol=500;clickVol=400;clickFreq=900;clickDur=70;musicVol=300;localStorage.setItem('morse-freq',morseFreq);localStorage.setItem('morse-vol',morseVol);localStorage.setItem('click-vol',clickVol);localStorage.setItem('click-freq',clickFreq);localStorage.setItem('click-dur',clickDur);localStorage.setItem('music-vol',musicVol);updSoundSliders()};
 window.catchParticle=function(){if(!particleEl)return;particlesCaught++;if(user){user.particlesCaught=particlesCaught;localStorage.setItem(`user-${user.username}`,JSON.stringify(user));localStorage.setItem('morse-user',JSON.stringify(user));savePlayerToCloud(user.username,user)}const ct=CATCHER_TITLES.find(x=>x.count===particlesCaught);if(ct){title=ct.name;if(user){user.title=ct.name;localStorage.setItem(`user-${user.username}`,JSON.stringify(user));localStorage.setItem('morse-user',JSON.stringify(user));savePlayerToCloud(user.username,user)}titleAnim(ct)}addExp(25);particleEl.remove();particleEl=null;showParticleCaught();updUI();save();startParticleGame()};
+
+// ============ ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ============
 function showParticleCaught(){const c=$('exp-animation');if(!c)return;c.textContent=t('particleCaught');c.style.top='70%';c.style.left='50%';c.classList.remove('show');void c.offsetWidth;c.classList.add('show');setTimeout(()=>c.classList.remove('show'),2000)}
 function startMusic(){if(!musicEl){musicEl=new Audio('https://cdn.pixabay.com/download/audio/2022/03/10/audio_2c8d0f1b5e.mp3?filename=lofi-study-112191.mp3');musicEl.loop=true}musicEl.volume=musicVol/1200;if(musicVol>0)musicEl.play().catch(()=>{})}
 function stopMusic(){if(musicEl)musicEl.pause()}
@@ -105,5 +198,19 @@ function updUI(){if(viewing)return;const l=lvlFromExp(exp),nl=l+1;const efn=expF
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{if(!user||viewing)return;user.exp=exp;user.attempts=attempts;user.correct=correct;user.sessionTime=Date.now()-sessStart;user.particlesCaught=particlesCaught;localStorage.setItem(`user-${user.username}`,JSON.stringify(user));localStorage.setItem('morse-user',JSON.stringify(user));savePlayerToCloud(user.username,user);cache=null},500)}
 function updBottomNav(p){const nav=$('bottom-nav');if(!nav)return;nav.querySelectorAll('a').forEach(a=>a.classList.remove('active'));const active=nav.querySelector(`a[data-page="${p}"]`);if(active)active.classList.add('active')}
 function closeModal(id){const el=$(id);if(el)el.style.display='none'}
-document.addEventListener('DOMContentLoaded',()=>{applyLang();auth();particles();keyListener();btnSounds();switchAlpha('ru',document.querySelector('.tab-btn'));setTimeout(()=>updLesson(),100);updDiffBtn();diffColor();preload();if($('page-home').classList.contains('active'))startParticleGame()});
+
+// ============ ЗАПУСК ============
+document.addEventListener('DOMContentLoaded',()=>{
+    applyLang();
+    auth();
+    particles();
+    keyListener();
+    btnSounds();
+    switchAlphabet('ru',document.querySelector('.tab-btn'));
+    setTimeout(()=>updLesson(),100);
+    updDiffBtn();
+    diffColor();
+    preload();
+    if($('page-home').classList.contains('active'))startParticleGame()
+});
 document.addEventListener('click',e=>{const n=$('mobile-nav');if(n&&n.classList.contains('active')&&!e.target.closest('.nav')&&!e.target.closest('.menu-toggle'))n.classList.remove('active')});
