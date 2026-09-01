@@ -1222,4 +1222,4 @@ body {
     .nav { display: flex !important; position: static; flex-direction: row; background: 0; border: 0; gap: 1rem; }
     .nav a { padding: 0.5rem 1rem; }
     .section-title { font-size: 1rem; }
-}
+    }
