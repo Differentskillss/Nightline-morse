@@ -1,294 +1,391 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>NIGHTLINE — Азбука Морзе</title>
-<link rel="stylesheet" href="style.css">
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d1117">
+    <title>NIGHTLINE — Азбука Морзе</title>
+    
+    <link rel="preconnect" href="https://nightline-morse-default-rtdb.europe-west1.firebasedatabase.app">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
-<div class="crt-overlay"></div>
+    <div class="crt-overlay"></div>
 
-<!-- Авторизация -->
-<div class="auth-modal" id="auth-modal">
-<div class="auth-content" onclick="event.stopPropagation()">
-<div class="auth-logo">NIGHTLINE 0.61</div>
-<div class="lang-row"><button class="lang-toggle" onclick="toggleLanguage()">Language: ENG</button></div>
-<div class="auth-tabs">
-<button class="auth-tab active" data-i18n="login" onclick="switchAuthTab('login',this)">ВОЙТИ</button>
-<button class="auth-tab" data-i18n="register" onclick="switchAuthTab('register',this)">СОЗДАТЬ</button>
-</div>
-<div id="login-form">
-<input type="text" id="login-username" data-i18n-placeholder="username" placeholder="Имя" class="auth-input" autocomplete="off">
-<input type="password" id="login-password" data-i18n-placeholder="passwordField" placeholder="Пароль" class="auth-input" autocomplete="off">
-<button class="btn-primary" data-i18n="login" onclick="login()">ВОЙТИ</button>
-</div>
-<div id="register-form" style="display:none">
-<input type="text" id="register-username" data-i18n-placeholder="username" placeholder="Имя" class="auth-input" autocomplete="off">
-<input type="password" id="register-password" data-i18n-placeholder="passwordField" placeholder="Пароль" class="auth-input" autocomplete="off">
-<button class="btn-primary" data-i18n="createAcc" onclick="register()">СОЗДАТЬ</button>
-</div>
-<div class="auth-error" id="auth-error"></div>
-</div>
-</div>
+    <!-- Авторизация -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
+            <div class="auth-logo">NIGHTLINE 0.62</div>
+            <div class="lang-row">
+                <button class="lang-toggle" onclick="toggleLanguage()">Language: ENG</button>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-i18n="login" onclick="switchAuthTab('login',this)">ВОЙТИ</button>
+                <button class="auth-tab" data-i18n="register" onclick="switchAuthTab('register',this)">СОЗДАТЬ</button>
+            </div>
+            <div id="login-form">
+                <input type="text" id="login-username" data-i18n-placeholder="username" placeholder="Имя" class="auth-input" autocomplete="off">
+                <input type="password" id="login-password" data-i18n-placeholder="passwordField" placeholder="Пароль" class="auth-input" autocomplete="off">
+                <button class="btn-primary" data-i18n="login" onclick="login()">ВОЙТИ</button>
+            </div>
+            <div id="register-form" style="display:none">
+                <input type="text" id="register-username" data-i18n-placeholder="username" placeholder="Имя" class="auth-input" autocomplete="off">
+                <input type="password" id="register-password" data-i18n-placeholder="passwordField" placeholder="Пароль" class="auth-input" autocomplete="off">
+                <button class="btn-primary" data-i18n="createAcc" onclick="register()">СОЗДАТЬ</button>
+            </div>
+            <div class="auth-error" id="auth-error"></div>
+        </div>
+    </div>
 
-<!-- Выход -->
-<div class="confirm-modal" id="logout-modal" onclick="closeConfirmModal('logout-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="logoutConfirm">ВЫЙТИ?</div>
-<div class="confirm-buttons">
-<button class="btn-confirm yes" data-i18n="yes" onclick="confirmLogout()">ДА</button>
-<button class="btn-confirm no" data-i18n="no" onclick="closeConfirmModal('logout-modal')">НЕТ</button>
-</div>
-</div>
-</div>
+    <div class="modal-overlay" id="modal-overlay"></div>
 
-<!-- Удаление аккаунта -->
-<div class="confirm-modal" id="delete-acc-modal" onclick="closeConfirmModal('delete-acc-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="deleteAccConfirm">УДАЛИТЬ АККАУНТ?</div>
-<div class="confirm-buttons">
-<button class="btn-confirm yes" data-i18n="yes" onclick="confirmDeleteAcc()" style="border-color:#f85149;color:#f85149">ДА</button>
-<button class="btn-confirm no" data-i18n="no" onclick="closeConfirmModal('delete-acc-modal')">НЕТ</button>
-</div>
-</div>
-</div>
+    <!-- Выход -->
+    <div class="confirm-modal" id="logout-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('logout-modal')">✕</button>
+            <div class="confirm-title" data-i18n="logoutConfirm">ВЫЙТИ?</div>
+            <div class="confirm-buttons">
+                <button class="btn-confirm yes" data-i18n="yes" onclick="confirmLogout()">ДА</button>
+                <button class="btn-confirm no" data-i18n="no" onclick="closeModal('logout-modal')">НЕТ</button>
+            </div>
+        </div>
+    </div>
 
-<!-- Смена пароля -->
-<div class="confirm-modal" id="password-modal" onclick="closeConfirmModal('password-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="changePass">СМЕНА ПАРОЛЯ</div>
-<input type="password" id="new-password-input" data-i18n-placeholder="newPass" placeholder="Новый пароль" class="auth-input" autocomplete="off">
-<div class="confirm-hint" data-i18n="passHint">Вы точно хотите сменить пароль?</div>
-<div class="confirm-buttons">
-<button class="btn-confirm yes" data-i18n="yes" onclick="confirmChangePassword()">ДА</button>
-<button class="btn-confirm no" data-i18n="no" onclick="closeConfirmModal('password-modal')">НЕТ</button>
-</div>
-</div>
-</div>
+    <!-- Удаление аккаунта -->
+    <div class="confirm-modal" id="delete-acc-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('delete-acc-modal')">✕</button>
+            <div class="confirm-title" data-i18n="deleteAccConfirm">УДАЛИТЬ АККАУНТ?</div>
+            <div class="confirm-buttons">
+                <button class="btn-confirm yes" data-i18n="yes" onclick="confirmDeleteAcc()" style="border-color:#f85149;color:#f85149">ДА</button>
+                <button class="btn-confirm no" data-i18n="no" onclick="closeModal('delete-acc-modal')">НЕТ</button>
+            </div>
+        </div>
+    </div>
 
-<!-- Показ пароля -->
-<div class="confirm-modal" id="show-password-modal" onclick="closeConfirmModal('show-password-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="password">ПАРОЛЬ</div>
-<div class="password-display" id="password-display"></div>
-<button class="btn-confirm no" data-i18n="close" onclick="closeConfirmModal('show-password-modal')">ЗАКРЫТЬ</button>
-</div>
-</div>
+    <!-- Смена пароля -->
+    <div class="confirm-modal" id="password-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('password-modal')">✕</button>
+            <div class="confirm-title" data-i18n="changePass">СМЕНА ПАРОЛЯ</div>
+            <input type="password" id="new-password-input" data-i18n-placeholder="newPass" placeholder="Новый пароль" class="auth-input" autocomplete="off">
+            <div class="confirm-hint" data-i18n="passHint">Вы точно хотите сменить пароль?</div>
+            <div class="confirm-buttons">
+                <button class="btn-confirm yes" data-i18n="yes" onclick="confirmChangePassword()">ДА</button>
+                <button class="btn-confirm no" data-i18n="no" onclick="closeModal('password-modal')">НЕТ</button>
+            </div>
+        </div>
+    </div>
 
-<!-- Выбор пароля -->
-<div class="confirm-modal" id="password-options-modal" onclick="closeConfirmModal('password-options-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="password">ПАРОЛЬ</div>
-<div class="confirm-buttons column">
-<button class="btn-confirm yes" data-i18n="showPass" onclick="openShowPasswordModal()">ПОКАЗАТЬ ПАРОЛЬ</button>
-<button class="btn-confirm yes" data-i18n="changePassBtn" onclick="openPasswordModal()">СМЕНИТЬ ПАРОЛЬ</button>
-</div>
-</div>
-</div>
+    <!-- Показ пароля -->
+    <div class="confirm-modal" id="show-password-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('show-password-modal')">✕</button>
+            <div class="confirm-title" data-i18n="password">ПАРОЛЬ</div>
+            <div class="password-display" id="password-display"></div>
+            <button class="btn-confirm no" data-i18n="close" onclick="closeModal('show-password-modal')">ЗАКРЫТЬ</button>
+        </div>
+    </div>
 
-<!-- Настройки -->
-<div class="titles-modal" id="settings-modal" onclick="closeSettingsModal()">
-<div class="titles-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="settings">НАСТРОЙКИ</div>
-<div class="confirm-buttons column">
-<button class="btn-confirm yes lang-toggle" onclick="toggleLanguage()">Language: ENG</button>
-<button class="btn-confirm yes" data-i18n="sound" onclick="openSoundSettings()">ЗВУК</button>
-<button class="btn-confirm yes" data-i18n="password" onclick="openPasswordOptionsModal()">ПАРОЛЬ</button>
-<button class="btn-confirm yes" data-i18n="deleteAcc" onclick="openDeleteAccModal()" style="border-color:#f85149;color:#f85149">УДАЛИТЬ АККАУНТ</button>
-</div>
-</div>
-</div>
+    <!-- Выбор пароля -->
+    <div class="confirm-modal" id="password-options-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('password-options-modal')">✕</button>
+            <div class="confirm-title" data-i18n="password">ПАРОЛЬ</div>
+            <div class="confirm-buttons column">
+                <button class="btn-confirm yes" data-i18n="showPass" onclick="openShowPasswordModal()">ПОКАЗАТЬ ПАРОЛЬ</button>
+                <button class="btn-confirm yes" data-i18n="changePassBtn" onclick="openPasswordModal()">СМЕНИТЬ ПАРОЛЬ</button>
+            </div>
+        </div>
+    </div>
 
-<!-- Звук -->
-<div class="titles-modal" id="sound-modal" onclick="closeSoundModal()">
-<div class="titles-content" onclick="event.stopPropagation()" style="position:relative">
-<div class="confirm-title" data-i18n="sound">ЗВУК</div>
-<div class="sound-label"><span data-i18n="morseFreq">ЧАСТОТА МОРЗЕ</span><span class="sound-value" id="morse-freq-val">700гц</span></div>
-<input type="range" class="sound-slider" id="morse-freq" min="1" max="1200" value="700" oninput="changeMorseFreq(this.value)">
-<div class="sound-label"><span data-i18n="morseVol">ГРОМКОСТЬ МОРЗЕ</span><span class="sound-value" id="morse-vol-val">500</span></div>
-<input type="range" class="sound-slider" id="morse-vol" min="0" max="1200" value="500" oninput="changeMorseVol(this.value)">
-<div class="sound-label"><span data-i18n="clickVol">ГРОМКОСТЬ КНОПОК</span><span class="sound-value" id="click-vol-val">400</span></div>
-<input type="range" class="sound-slider" id="click-vol" min="0" max="1200" value="400" oninput="changeClickVol(this.value)">
-<div class="sound-label"><span data-i18n="clickFreq">ЧАСТОТА КНОПОК</span><span class="sound-value" id="click-freq-val">900гц</span></div>
-<input type="range" class="sound-slider" id="click-freq" min="1" max="1200" value="900" oninput="changeClickFreq(this.value)">
-<div class="sound-label"><span data-i18n="clickDur">ДЛИТЕЛЬНОСТЬ ЗВУКА ПРИ НАЖАТИИ</span><span class="sound-value" id="click-dur-val">70мс</span></div>
-<input type="range" class="sound-slider" id="click-dur" min="10" max="200" value="70" oninput="changeClickDur(this.value)">
-<div class="sound-label"><span data-i18n="musicVol">ГРОМКОСТЬ МУЗЫКИ (скоро)</span><span class="sound-value" id="music-vol-val">300</span></div>
-<input type="range" class="sound-slider" id="music-vol" min="0" max="1200" value="300" oninput="changeMusicVol(this.value)">
-<button class="btn-confirm no" data-i18n="reset" onclick="resetSoundSettings()" style="position:absolute;bottom:10px;right:10px;font-size:.4rem;padding:.4rem">СБРОС</button>
-</div>
-</div>
+    <!-- Настройки -->
+    <div class="titles-modal" id="settings-modal">
+        <div class="titles-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+            <div class="confirm-title" data-i18n="settings">НАСТРОЙКИ</div>
+            <div class="confirm-buttons column">
+                <button class="btn-confirm yes lang-toggle" onclick="toggleLanguage()">Language: ENG</button>
+                <button class="btn-confirm yes" data-i18n="sound" onclick="openSoundSettings()">ЗВУК</button>
+                <button class="btn-confirm yes" data-i18n="password" onclick="openPasswordOptionsModal()">ПАРОЛЬ</button>
+                <button class="btn-confirm yes" data-i18n="deleteAcc" onclick="openDeleteAccModal()" style="border-color:#f85149;color:#f85149">УДАЛИТЬ АККАУНТ</button>
+            </div>
+        </div>
+    </div>
 
-<!-- Блокировка модификатора -->
-<div class="confirm-modal" id="modifier-locked-modal" onclick="closeConfirmModal('modifier-locked-modal')">
-<div class="confirm-content" onclick="event.stopPropagation()">
-<span style="font-size:2rem;display:block;margin-bottom:1rem">🔒</span>
-<div class="confirm-title" id="modifier-lock-msg" data-i18n="modLockMsg">Достигните 30 уровня для модификаторов</div>
-<button class="btn-confirm no" data-i18n="close" onclick="closeConfirmModal('modifier-locked-modal')">ЗАКРЫТЬ</button>
-</div>
-</div>
+    <!-- Звук -->
+    <div class="titles-modal" id="sound-modal">
+        <div class="titles-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('sound-modal')">✕</button>
+            <div class="confirm-title" data-i18n="sound">ЗВУК</div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="morseFreq">ЧАСТОТА МОРЗЕ</span>
+                    <span class="sound-value" id="morse-freq-val">700гц</span>
+                </div>
+                <input type="range" class="sound-slider" id="morse-freq" min="1" max="1200" value="700">
+            </div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="morseVol">ГРОМКОСТЬ МОРЗЕ</span>
+                    <span class="sound-value" id="morse-vol-val">500</span>
+                </div>
+                <input type="range" class="sound-slider" id="morse-vol" min="0" max="1200" value="500">
+            </div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="clickVol">ГРОМКОСТЬ КНОПОК</span>
+                    <span class="sound-value" id="click-vol-val">400</span>
+                </div>
+                <input type="range" class="sound-slider" id="click-vol" min="0" max="1200" value="400">
+            </div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="clickFreq">ЧАСТОТА КНОПОК</span>
+                    <span class="sound-value" id="click-freq-val">900гц</span>
+                </div>
+                <input type="range" class="sound-slider" id="click-freq" min="1" max="1200" value="900">
+            </div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="clickDur">ДЛИТЕЛЬНОСТЬ ЗВУКА</span>
+                    <span class="sound-value" id="click-dur-val">70мс</span>
+                </div>
+                <input type="range" class="sound-slider" id="click-dur" min="10" max="200" value="70">
+            </div>
+            <div class="sound-group">
+                <div class="sound-label">
+                    <span data-i18n="musicVol">ГРОМКОСТЬ МУЗЫКИ</span>
+                    <span class="sound-value" id="music-vol-val">300</span>
+                </div>
+                <input type="range" class="sound-slider" id="music-vol" min="0" max="1200" value="300">
+            </div>
+            <button class="btn-confirm no" data-i18n="reset" onclick="resetSoundSettings()" style="font-size:.4rem;padding:.4rem">СБРОС</button>
+        </div>
+    </div>
 
-<!-- Титулы -->
-<div class="titles-modal" id="titles-modal" onclick="closeTitlesModal()">
-<div class="titles-content" onclick="event.stopPropagation()">
-<div class="titles-list" id="titles-list"></div>
-<div class="next-title" id="next-title"></div>
-</div>
-</div>
+    <!-- Блокировка модификатора -->
+    <div class="confirm-modal" id="modifier-locked-modal">
+        <div class="confirm-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('modifier-locked-modal')">✕</button>
+            <span style="font-size:2rem;display:block;margin-bottom:1rem">🔒</span>
+            <div class="confirm-title" id="modifier-lock-msg" data-i18n="modLockMsg">Достигните 30 уровня для модификаторов</div>
+            <button class="btn-confirm no" data-i18n="close" onclick="closeModal('modifier-locked-modal')">ЗАКРЫТЬ</button>
+        </div>
+    </div>
 
-<!-- Косметика -->
-<div class="titles-modal" id="cosmetics-modal" onclick="closeCosmeticsModal()">
-<div class="titles-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="cosmeticsTitle">КОСМЕТИКА</div>
-<button class="btn-confirm yes" data-i18n="titles" onclick="closeCosmeticsModal();openTitlesModal()">ТИТУЛЫ</button>
-</div>
-</div>
+    <!-- Титулы -->
+    <div class="titles-modal" id="titles-modal">
+        <div class="titles-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('titles-modal')">✕</button>
+            <div class="titles-list" id="titles-list"></div>
+            <div class="next-title" id="next-title"></div>
+        </div>
+    </div>
 
-<!-- Модификаторы -->
-<div class="titles-modal" id="modifiers-modal" onclick="closeModifiersModal()">
-<div class="titles-content" onclick="event.stopPropagation()">
-<div class="confirm-title" data-i18n="modifiers">МОДИФИКАТОРЫ</div>
-<div class="modifier-item" id="mod-shuffle" onclick="toggleShuffleModifier()">
-<span class="modifier-icon">🔀</span><span class="modifier-name" data-i18n="shuffle">В ПЕРЕМЕШКУ</span>
-<span class="modifier-desc" id="mod-shuffle-desc" style="display:none"><span data-i18n="shuffleDesc">рандомные знаки</span> <span class="modifier-exp">+35%exp</span></span>
-</div>
-</div>
-</div>
+    <!-- Косметика -->
+    <div class="titles-modal" id="cosmetics-modal">
+        <div class="titles-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('cosmetics-modal')">✕</button>
+            <div class="confirm-title" data-i18n="cosmeticsTitle">КОСМЕТИКА</div>
+            <button class="btn-confirm yes" data-i18n="titles" onclick="closeModal('cosmetics-modal'); openTitlesModal()">ТИТУЛЫ</button>
+        </div>
+    </div>
 
-<!-- Анимации -->
-<div class="exp-animation" id="exp-animation"></div>
-<div class="rank-animation" id="rank-animation"></div>
-<div class="title-animation" id="title-animation"></div>
+    <!-- Модификаторы -->
+    <div class="titles-modal" id="modifiers-modal">
+        <div class="titles-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal('modifiers-modal')">✕</button>
+            <div class="confirm-title" data-i18n="modifiers">МОДИФИКАТОРЫ</div>
+            <div class="modifier-item" id="mod-shuffle" onclick="toggleShuffleModifier()">
+                <span class="modifier-icon">🔀</span>
+                <span class="modifier-name" data-i18n="shuffle">В ПЕРЕМЕШКУ</span>
+                <span class="modifier-desc" id="mod-shuffle-desc" style="display:none">
+                    <span data-i18n="shuffleDesc">рандомные знаки</span>
+                    <span class="modifier-exp">+35%exp</span>
+                </span>
+            </div>
+        </div>
+    </div>
 
-<!-- Шапка -->
-<header class="header">
-<div class="logo">NIGHTLINE 0.61</div>
-<nav class="nav" id="mobile-nav">
-<a href="#" data-i18n="home" onclick="showPage('home')">Главная</a>
-<a href="#" data-i18n="learn" onclick="showPage('learn')">Обучение</a>
-<a href="#" data-i18n="practice" onclick="showPage('practice')">Практика</a>
-<a href="#" data-i18n="leaderboard" onclick="showPage('leaderboard')">Топы</a>
-<a href="#" data-i18n="profile" onclick="showPage('profile')">Профиль</a>
-</nav>
-</header>
+    <!-- Анимации -->
+    <div class="particle-animation" id="particle-animation"></div>
+    <div class="exp-animation" id="exp-animation"></div>
+    <div class="rank-animation" id="rank-animation"></div>
+    <div class="title-animation" id="title-animation"></div>
 
-<!-- Главная -->
-<div id="page-home" class="page active">
-<section class="hero">
-<div class="hero-content">
-<div class="hero-logo">NIGHTLINE 0.61</div>
-<h1 class="hero-title"><span data-i18n="heroTitle">ИЗУЧЕНИЕ</span><br><span class="accent" data-i18n="heroAccent">АЗБУКИ МОРЗЕ</span></h1>
-<p class="hero-subtitle" data-i18n="heroSubtitle">Тренируйся передавать сигналы</p>
-</div>
-</section>
-<footer class="footer"><p data-i18n="footer" id="footer-text">СДЕЛАНО В ОБРАЗОВАТЕЛЬНЫХ ЦЕЛЯХ</p></footer>
-</div>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="logo">NIGHTLINE 0.62</div>
+        <nav class="nav" id="mobile-nav">
+            <a href="#" data-i18n="home" onclick="showPage('home')">Главная</a>
+            <a href="#" data-i18n="learn" onclick="showPage('learn')">Обучение</a>
+            <a href="#" data-i18n="practice" onclick="showPage('practice')">Практика</a>
+            <a href="#" data-i18n="leaderboard" onclick="showPage('leaderboard')">Топы</a>
+            <a href="#" data-i18n="profile" onclick="showPage('profile')">Профиль</a>
+        </nav>
+    </header>
 
-<!-- Обучение -->
-<div id="page-learn" class="page">
-<section class="section">
-<h2 class="section-title" data-i18n="learning">ОБУЧЕНИЕ</h2>
-<div class="lesson-tabs">
-<button class="tab-btn active" onclick="switchAlphabet('ru',this)">RU</button>
-<button class="tab-btn" onclick="switchAlphabet('en',this)">EN</button>
-<button class="tab-btn" onclick="switchAlphabet('numbers',this)">0-9</button>
-<button class="tab-btn" data-i18n="signs" onclick="switchAlphabet('punct',this)">ЗНАКИ</button>
-</div>
-<div class="lesson-card">
-<div class="lesson-letter" id="current-letter">А</div>
-<div class="lesson-morse" id="current-morse">.-</div>
-<div class="lesson-visual" id="lesson-visual"></div>
-<button class="btn-play" data-i18n="lesson" onclick="playCurrentLesson()">ПРОСЛУШАТЬ</button>
-<div class="lesson-nav">
-<button class="btn-nav" onclick="prevLesson()">←</button>
-<span class="lesson-counter" id="lesson-counter">1/33</span>
-<button class="btn-nav" onclick="nextLesson()">→</button>
-</div>
-</div>
-</section>
-</div>
+    <!-- Главная -->
+    <div id="page-home" class="page active">
+        <section class="hero">
+            <div class="particles-container" id="particles-container"></div>
+            <div class="hero-content">
+                <div class="hero-logo">NIGHTLINE 0.62</div>
+                <h1 class="hero-title">
+                    <span data-i18n="heroTitle">ИЗУЧЕНИЕ</span><br>
+                    <span class="accent" data-i18n="heroAccent">АЗБУКИ МОРЗЕ</span>
+                </h1>
+                <p class="hero-subtitle" data-i18n="heroSubtitle">Тренируйся передавать сигналы</p>
+            </div>
+        </section>
+        <footer class="footer">
+            <p data-i18n="footer" id="footer-text">СДЕЛАНО В ОБРАЗОВАТЕЛЬНЫХ ЦЕЛЯХ</p>
+            <p style="font-size:0.45rem;margin-top:0.5rem;letter-spacing:1px">
+                <a href="https://t.me/vsRk0e" target="_blank" style="color:var(--pc);text-decoration:none;transition:var(--t);">
+                    📡 Мой ТГК: https://t.me/vsRk0e
+                </a>
+            </p>
+        </footer>
+    </div>
 
-<!-- Практика -->
-<div id="page-practice" class="page">
-<section class="section">
-<h2 class="section-title" data-i18n="practiceTitle">ПРАКТИКА</h2>
-<div class="difficulty-row">
-<button class="difficulty-btn" id="difficulty-btn" onclick="cycleDifficulty()">ЛЁГКАЯ</button>
-<button class="modifiers-btn" onclick="openModifiersModal()">⚙</button>
-</div>
-<div class="transmit-console">
-<div class="console-title" data-i18n="radio">РАДИОПЕРЕДАЧА</div>
-<div class="target-word" id="target-word">—</div>
-<div class="target-morse" id="target-morse"></div>
-<div class="progress-letters" id="progress-letters"></div>
-<div class="key-display" id="key-display" data-i18n="pressHold">НАЖМИ И ДЕРЖИ</div>
-<button class="key-button" id="morse-key"><span class="key-ring"></span><span class="key-text" data-i18n="transmit">ПЕРЕДАЧА</span></button>
-<div class="transmit-feedback" id="transmit-feedback"></div>
-<button class="btn-control" data-i18n="newWord" onclick="startTransmitGame()">НОВОЕ СЛОВО</button>
-</div>
-</section>
-</div>
+    <!-- Обучение -->
+    <div id="page-learn" class="page">
+        <section class="section">
+            <h2 class="section-title" data-i18n="learning">ОБУЧЕНИЕ</h2>
+            <div class="lesson-tabs">
+                <button class="tab-btn active" onclick="switchAlphabet('ru',this)">RU</button>
+                <button class="tab-btn" onclick="switchAlphabet('en',this)">EN</button>
+                <button class="tab-btn" onclick="switchAlphabet('numbers',this)">0-9</button>
+                <button class="tab-btn" data-i18n="signs" onclick="switchAlphabet('punct',this)">ЗНАКИ</button>
+            </div>
+            <div class="lesson-card">
+                <div class="lesson-letter" id="current-letter">А</div>
+                <div class="lesson-morse" id="current-morse">.-</div>
+                <div class="lesson-visual" id="lesson-visual"></div>
+                <button class="btn-play" data-i18n="lesson" onclick="playCurrentLesson()">ПРОСЛУШАТЬ</button>
+                <div class="lesson-nav">
+                    <button class="btn-nav" onclick="prevLesson()">←</button>
+                    <span class="lesson-counter" id="lesson-counter">1/33</span>
+                    <button class="btn-nav" onclick="nextLesson()">→</button>
+                </div>
+            </div>
+        </section>
+    </div>
 
-<!-- Топы -->
-<div id="page-leaderboard" class="page">
-<section class="section">
-<h2 class="section-title" data-i18n="topLevel">ТОП ПО УРОВНЮ</h2>
-<div id="leaderboard-locked" class="leaderboard-locked" style="display:none">
-<span class="lock-icon">🔒</span>
-<span class="lock-text" id="lock-msg" data-i18n="lockMsg">Достигните 50 уровня чтобы разблокировать таблицу лидеров</span>
-</div>
-<div id="leaderboard-content">
-<div class="leaderboard-tabs">
-<button class="leaderboard-tab active" data-i18n="byLevel" onclick="switchLeaderboardTab('level',this)">ПО УРОВНЮ</button>
-<button class="leaderboard-tab" data-i18n="byTime" onclick="switchLeaderboardTab('time',this)">ПО ВРЕМЕНИ</button>
-</div>
-<div class="leaderboard-list" id="leaderboard-list"></div>
-</div>
-</section>
-</div>
+    <!-- Практика -->
+    <div id="page-practice" class="page">
+        <section class="section">
+            <h2 class="section-title" data-i18n="practiceTitle">ПРАКТИКА</h2>
+            <div class="difficulty-row">
+                <button class="difficulty-btn" id="difficulty-btn" onclick="cycleDifficulty()">ЛЁГКАЯ</button>
+                <button class="modifiers-btn" onclick="openModifiersModal()">⚙</button>
+            </div>
+            <div class="transmit-console">
+                <div class="console-title" data-i18n="radio">РАДИОПЕРЕДАЧА</div>
+                <div class="target-word" id="target-word">—</div>
+                <div class="target-morse" id="target-morse"></div>
+                <div class="progress-letters" id="progress-letters"></div>
+                <div class="key-display" id="key-display" data-i18n="pressHold">НАЖМИ И ДЕРЖИ</div>
+                <button class="key-button" id="morse-key">
+                    <span class="key-ring"></span>
+                    <span class="key-text" data-i18n="transmit">ПЕРЕДАЧА</span>
+                </button>
+                <div class="transmit-feedback" id="transmit-feedback"></div>
+                <button class="btn-control" data-i18n="newWord" onclick="startTransmitGame()">НОВОЕ СЛОВО</button>
+            </div>
+        </section>
+    </div>
 
-<!-- Профиль -->
-<div id="page-profile" class="page">
-<section class="section">
-<h2 class="section-title" data-i18n="profileTitle">ПРОФИЛЬ</h2>
-<div class="rank-card">
-<div class="profile-avatar">👤</div>
-<div class="profile-name-row">
-<span class="profile-name" id="profile-username"></span>
-<span class="profile-title" id="profile-title"></span>
-<span class="profile-level" id="profile-level"></span>
-</div>
-<div class="profile-created" id="profile-created"></div>
-<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-<div class="progress-info"><span id="exp-current">0</span>/<span id="exp-needed">1</span> <span data-i18n="exp">EXP</span></div>
-<div class="stats-grid">
-<div class="stat-item"><span class="stat-value" id="accuracy">0%</span><span class="stat-label" data-i18n="accuracy">ТОЧНОСТЬ</span></div>
-<div class="stat-item"><span class="stat-value" id="profile-session-time">0м</span><span class="stat-label" data-i18n="time">ВРЕМЯ</span></div>
-</div>
-<div class="profile-actions">
-<button class="btn-control" data-i18n="cosmetics" onclick="openCosmeticsModal()">КОСМЕТИКА</button>
-<button class="btn-control" data-i18n="settings" onclick="openSettingsModal()">НАСТРОЙКИ</button>
-<button class="btn-control logout-btn" data-i18n="logout" onclick="openLogoutModal()">ВЫЙТИ</button>
-</div>
-</div>
-</section>
-</div>
+    <!-- Топы -->
+    <div id="page-leaderboard" class="page">
+        <section class="section">
+            <h2 class="section-title" data-i18n="topLevel">ТОП ПО УРОВНЮ</h2>
+            <div id="leaderboard-locked" class="leaderboard-locked" style="display:none">
+                <span class="lock-icon">🔒</span>
+                <span class="lock-text" id="lock-msg" data-i18n="lockMsg">Достигните 20 уровня чтобы разблокировать таблицу лидеров</span>
+            </div>
+            <div id="leaderboard-content">
+                <div class="leaderboard-tabs">
+                    <button class="leaderboard-tab active" data-i18n="byLevel" onclick="switchLeaderboardTab('level',this)">ПО УРОВНЮ</button>
+                    <button class="leaderboard-tab" data-i18n="byTime" onclick="switchLeaderboardTab('time',this)">ПО ВРЕМЕНИ</button>
+                </div>
+                <div class="leaderboard-list" id="leaderboard-list"></div>
+            </div>
+        </section>
+    </div>
 
-<!-- Нижняя навигация -->
-<nav class="bottom-nav" id="bottom-nav">
-<a href="#" data-page="home" class="active" onclick="showPage('home')"><span class="nav-icon">🏠</span><span data-i18n="home">Главная</span></a>
-<a href="#" data-page="learn" onclick="showPage('learn')"><span class="nav-icon">📚</span><span data-i18n="learn">Обучение</span></a>
-<a href="#" data-page="practice" onclick="showPage('practice')"><span class="nav-icon">📡</span><span data-i18n="practice">Практика</span></a>
-<a href="#" data-page="leaderboard" onclick="showPage('leaderboard')"><span class="nav-icon">🏆</span><span data-i18n="leaderboard">Топы</span></a>
-<a href="#" data-page="profile" onclick="showPage('profile')"><span class="nav-icon">👤 </span><span data-i18n="profile">Профиль</span></a>
-</nav>
+    <!-- Профиль -->
+    <div id="page-profile" class="page">
+        <section class="section">
+            <h2 class="section-title" data-i18n="profileTitle">ПРОФИЛЬ</h2>
+            <div class="rank-card">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-name-row">
+                    <span class="profile-name" id="profile-username"></span>
+                    <span class="profile-title" id="profile-title"></span>
+                    <span class="profile-level" id="profile-level"></span>
+                </div>
+                <div class="profile-created" id="profile-created"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-info">
+                    <span id="exp-current">0</span>/<span id="exp-needed">1</span> <span data-i18n="exp">EXP</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="accuracy">0%</span>
+                        <span class="stat-label" data-i18n="accuracy">ТОЧНОСТЬ</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="profile-session-time">0м</span>
+                        <span class="stat-label" data-i18n="time">ВРЕМЯ</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="profile-particles-caught">0</span>
+                        <span class="stat-label" data-i18n="particlesCaught">ЧАСТИЦ ПОЙМАНО</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn-control" data-i18n="cosmetics" onclick="openCosmeticsModal()">КОСМЕТИКА</button>
+                    <button class="btn-control" data-i18n="settings" onclick="openSettingsModal()">НАСТРОЙКИ</button>
+                    <button class="btn-control logout-btn" data-i18n="logout" onclick="openLogoutModal()">ВЫЙТИ</button>
+                </div>
+            </div>
+        </section>
+    </div>
 
-<script src="script.js"></script>
+    <!-- Нижняя навигация -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="#" data-page="home" class="active" onclick="showPage('home')">
+            <span class="nav-icon">🏠</span>
+            <span data-i18n="home">Главная</span>
+        </a>
+        <a href="#" data-page="learn" onclick="showPage('learn')">
+            <span class="nav-icon">📚</span>
+            <span data-i18n="learn">Обучение</span>
+        </a>
+        <a href="#" data-page="practice" onclick="showPage('practice')">
+            <span class="nav-icon">📡</span>
+            <span data-i18n="practice">Практика</span>
+        </a>
+        <a href="#" data-page="leaderboard" onclick="showPage('leaderboard')">
+            <span class="nav-icon">🏆</span>
+            <span data-i18n="leaderboard">Топы</span>
+        </a>
+        <a href="#" data-page="profile" onclick="showPage('profile')">
+            <span class="nav-icon">👤</span>
+            <span data-i18n="profile">Профиль</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
 </body>
-</html>
+              </html>
